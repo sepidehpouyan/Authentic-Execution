@@ -1,0 +1,65 @@
+{
+    "nodes": [
+        {
+            "type": "trustzone",
+            "name": "node1",
+            "number": 1,
+            "ip_address": "127.0.0.1",
+            "reactive_port": 1236,
+            "deploy_port": 1236
+        }
+    ],
+    "modules": [
+        {
+            "type": "trustzone",
+            "name": "ta1",
+            "files": "/home/sepideh/Desktop/reactive-tools/examples/trustzone",
+            "node": "node1",
+            "binary": "/home/sepideh/Desktop/reactive-tools/examples/trustzone/ta1/d3bc8433-2eb5-4c00-a005-3f87c1d3b405.ta",
+            "id": 281445940253181251961359712745212326917,
+            "key": "efa65cc4e771a33f1d22ad3814f2dcb7",
+            "inputs": {
+                "input": 4,
+                "input01": 5
+            },
+            "outputs": {
+                "output": 6,
+                "output01": 7
+            },
+            "entrypoints": {
+                "entry": 3
+            }
+        },
+        {
+            "type": "trustzone",
+            "name": "ta2",
+            "files": "/home/sepideh/Desktop/reactive-tools/examples/trustzone",
+            "node": "node1",
+            "binary": "/home/sepideh/Desktop/reactive-tools/examples/trustzone/ta2/b210f0df-8a68-4b24-880a-8713586c4d10.ta",
+            "id": 236690545488471714192740514222985465104,
+            "key": "5cbd14393832293e098a064249e038e4",
+            "inputs": {
+                "input": 4,
+                "input01": 5
+            },
+            "outputs": {
+                "output": 6,
+                "output01": 7
+            },
+            "entrypoints": {
+                "entry": 3
+            }
+        }
+    ],
+    "connections": [
+        {
+            "from_module": "ta1",
+            "from_output": "output",
+            "to_module": "ta2",
+            "to_input": "input",
+            "encryption": "aes",
+            "key": "bca4030e53e9f8b949e810eeb2779082"
+        }
+    ],
+    "periodic-events": []
+}
