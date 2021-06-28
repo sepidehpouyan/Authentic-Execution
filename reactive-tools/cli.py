@@ -127,7 +127,7 @@ def _handle_call(args):
 
 def main(raw_argv=None):
     args = _parse_args(raw_argv)
-
+    print("hi")
     _setup_logging(args)
     _setup_pdb(args)
     

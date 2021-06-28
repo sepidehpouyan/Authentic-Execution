@@ -17,7 +17,7 @@
             "node": "node1",
             "binary": "/home/sepideh/Desktop/reactive-tools/examples/trustzone/ta1/d3bc8433-2eb5-4c00-a005-3f87c1d3b405.ta",
             "id": 281445940253181251961359712745212326917,
-            "key": "efa65cc4e771a33f1d22ad3814f2dcb7",
+            "key": "24814d540c35199813fe99d3efcbdadc",
             "inputs": {
                 "input": 4,
                 "input01": 5
@@ -37,7 +37,7 @@
             "node": "node1",
             "binary": "/home/sepideh/Desktop/reactive-tools/examples/trustzone/ta2/b210f0df-8a68-4b24-880a-8713586c4d10.ta",
             "id": 236690545488471714192740514222985465104,
-            "key": "5cbd14393832293e098a064249e038e4",
+            "key": "85522c5ee5ae2475204819760ed6f5cc",
             "inputs": {
                 "input": 4,
                 "input01": 5
@@ -58,7 +58,7 @@
             "to_module": "ta2",
             "to_input": "input",
             "encryption": "aes",
-            "key": "bca4030e53e9f8b949e810eeb2779082"
+            "key": "2775633a5cdefe4ffa4ac94ea23019b7"
         }
     ],
     "periodic-events": []

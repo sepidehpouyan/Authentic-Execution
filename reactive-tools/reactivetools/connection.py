@@ -21,6 +21,7 @@ class Connection(namedtuple('Connection', ['from_module', 'from_output',
         
         set_key_from = from_node.set_key(self.from_module, conn_id, self.from_output,
                                      self.encryption, self.key, ConnectionIO.OUTPUT)
+                    
         set_key_to = to_node.set_key(self.to_module, conn_id, self.to_input,
                                      self.encryption, self.key, ConnectionIO.INPUT)
 

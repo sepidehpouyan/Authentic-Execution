@@ -30,10 +30,12 @@ class TrustZoneNode(Node):
     
 
         uid = module.id.to_bytes(16, 'big')
-        #for b in uid:
+        print("---------------------------------------------------\n")
+        print("size = ", len(file_data))
+        #for b in file_data:
             #print(hex(b), end= ' ')
         payload = uid + file_data
-        #print("---------------------------------------------------")
+        print("---------------------------------------------------")
         #print(hex(payload[0]))
        
         command = CommandMessage(ReactiveCommand.Load,
