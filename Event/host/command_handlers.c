@@ -26,35 +26,31 @@ ResultMessage handler_add_connection(CommandMessage m) {
   
   int j = 0;
   connection.conn_id = 0;
-  for(int n=1; n>=0; --n){
+  for(int n = 1; n >= 0; --n){
     connection.conn_id = connection.conn_id + (( m->message->payload[n] & 0xFF ) << (8*j));
     ++j;
   }	
   printf("conn id : %d\n", connection.conn_id);
   //----------------------------------------------
-  for(int i = 0; i < 16; i++){
-    connection.to_sm[i] = m->message->payload[i+2];
-  }
-
-  //--------------------------------------------------------------------
+  
   j = 0;
-  connection.to_node = 0;
-  for(int n=19; n>=18; --n){
-    connection.to_node = connection.to_node + (( m->message->payload[n] & 0xFF ) << (8*j));
+  connection.to_sm = 0;
+  for(int n = 3; n >= 2; --n){
+    connection.to_sm = connection.to_sm + (( m->message->payload[n] & 0xFF ) << (8*j));
     ++j;
   }	
-  printf("port number : %d\n", connection.to_node);
+  printf("to_module id : %d\n", connection.to_sm);
   //---------------------------------------------------------------------
   j = 0;
   connection.to_port = 0;
-  for(int n=21; n>=20; --n){
+  for(int n = 5; n >= 4; --n){
     connection.to_port = connection.to_port + (( m->message->payload[n] & 0xFF ) << (8*j));
     ++j;
   }	
   printf("port number : %d\n", connection.to_port);
   //--------------------------------------------------------------------
-  for(int n = 22; n < 26; n++){
-    connection.to_address.u8[n-22] = m->message->payload[n];
+  for(int n = 6; n < 10; n++){
+    connection.to_address.u8[n-6] = m->message->payload[n];
   }
 
   destroy_command_message(m);
@@ -71,19 +67,31 @@ ResultMessage handler_call_entrypoint(CommandMessage m) {
   
   ResultMessage res;
   int j = 0;
+  uint16_t module_id = 0 ;
+  for(int n = 1; n >= 0; --n){
+    module_id = module_id + (( m->message->payload[n] & 0xFF ) << (8*j));
+    ++j;
+  }
+
+  j = 0;
   uint16_t index = 0 ;
-  for(int n=17; n>=16; --n){
+  for(int n = 3; n >= 2; --n){
     index = index + (( m->message->payload[n] & 0xFF ) << (8*j));
     ++j;
-  }	
-  printf("index : %d\n", index);
+  }
+
+  uint32_t data_len = m->message->size - 4;
+  printf("index : %d ^^^^^^ data_len: %d\n", index, data_len);
 
   switch(index) {
+    case Entrypoint_Attest:
+      res = handle_attest(m->message->payload, module_id);
+      break;
     case Entrypoint_SetKey:
-      res = handle_set_key(m->message->payload);
+      res = handle_set_key(m->message->payload, module_id);
       break;
     default:
-      res = handle_user_entrypoint(m->message->payload);
+      res = handle_user_entrypoint(m->message->payload, data_len, module_id);
   }
 
   destroy_command_message(m);
@@ -93,29 +101,44 @@ ResultMessage handler_call_entrypoint(CommandMessage m) {
 
 ResultMessage handler_remote_output(CommandMessage m) {
 
+  uint32_t size = m->message->size - (2 + 2 + 16); // module id + conn id + tag
   conn_index conn_id;
-  unsigned char *sm_id;
-  sm_id = malloc(16);
+  uint16_t sm_id;
   unsigned char *encrypt;
-  encrypt = malloc(16);
+  encrypt = malloc(size);
   unsigned char *tag;
   tag = malloc(16);
   
-  memcpy(sm_id, m->message->payload, 16);
-
   int j = 0;
+  sm_id = 0;
+  for(int n = 1; n >= 0; --n){
+    sm_id = sm_id + (( m->message->payload[n] & 0xFF ) << (8*j));
+    ++j;
+  }	
+  //--------------------------------------------------------------------
+
+  j = 0;
   conn_id = 0;
-  for(int n=17; n>=16; --n){
+  for(int n = 3; n >= 2; --n){
     conn_id = conn_id + (( m->message->payload[n] & 0xFF ) << (8*j));
     ++j;
   }	
 
-  memcpy(encrypt, m->message->payload + 18, 16);
-  memcpy(tag, m->message->payload + 34, 16);
+  memcpy(encrypt, m->message->payload + 4, size);
+  memcpy(tag, m->message->payload + 4 + size, 16);
 
-  reactive_handle_input(sm_id, conn_id, encrypt, tag);
+  printf("size: %d conn_id: %d sm_id: %d\n", size, conn_id, sm_id);
+  for(int i=0; i<size; i++){
+    printf("%02X", encrypt[i]);
 
-  free(sm_id);
+  }
+
+  for(int i=0; i<16; i++){
+    printf("%02X", tag[i]);
+
+  }
+  reactive_handle_input(sm_id, conn_id, encrypt, size, tag);
+
   free(encrypt);
   free(tag);
   destroy_command_message(m);

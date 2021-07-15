@@ -154,8 +154,7 @@ int main()
             sd = client_socket[i];   
                  
             if (FD_ISSET(sd , &readfds))   
-            { 
-                printf("helooo i: %d  sd : %d\n", i, sd);
+            {
                 int res = event_manager_run(sd, address, addrlen, client_socket, i);
                 
             }

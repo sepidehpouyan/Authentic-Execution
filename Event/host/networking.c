@@ -25,7 +25,6 @@ Message create_message(uint32_t size, unsigned char *payload) {
 
   res->size = size;
   res->payload = payload;
-
   return res;
 }
 

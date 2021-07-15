@@ -12,8 +12,7 @@
 typedef struct
 {
     conn_index    conn_id;
-    unsigned char  to_sm[16];
-    uint16_t      to_node;
+    uint16_t      to_sm;
     uint16_t      to_port;
     ipv4_addr_t   to_address;
 } Connection;

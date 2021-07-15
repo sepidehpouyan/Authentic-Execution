@@ -1,7 +1,7 @@
 project (optee_example_event C)
 
 add_executable (${PROJECT_NAME}  host/main.c  host/event_manager.c  host/command_handlers.c 
-                 host/networking.c  host/utils.c  host/enclave_utils.c host/connection.c)
+        host/networking.c  host/utils.c  host/enclave_utils.c host/connection.c host/uuid.c)
 
 
 target_include_directories(${PROJECT_NAME}

@@ -6,7 +6,9 @@
 typedef enum
 {
     Entrypoint_SetKey                = 0x0,
-    Entrypoint_HandleInput           = 0x1
+    Entrypoint_Attest                = 0x1,
+    Entrypoint_HandleInput           = 0x2
+    
 } Entrypoint;
 
 ResultMessage handler_add_connection(CommandMessage m);
