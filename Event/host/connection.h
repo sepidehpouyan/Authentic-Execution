@@ -15,6 +15,7 @@ typedef struct
     uint16_t      to_sm;
     uint16_t      to_port;
     ipv4_addr_t   to_address;
+    bool          local;
 } Connection;
 
 // Copies connection so may be stack allocated.

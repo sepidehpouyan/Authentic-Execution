@@ -55,9 +55,7 @@ int event_manager_run(int sd, struct sockaddr_in address, int addrlen, int *clie
     while((n < byte_to_read)){
       
       ret = read(sd, buff, sizeof(buff));
-      printf("inside of while ret: %d\n", ret);
     	if(ret == 0){
-        printf("inside of if ret == 0\n");
         //Somebody disconnected , get his details and print  
         getpeername(sd , (struct sockaddr*)&address ,(socklen_t*)&addrlen);   
         printf("Host disconnected , ip %s , port %d \n", 
@@ -74,33 +72,28 @@ int event_manager_run(int sd, struct sockaddr_in address, int addrlen, int *clie
     	  size = 0;
         //==========================================================
         CommandCode code = u8_to_command_code(data[0]);
-        if(code == 3){
+        if(code == 3) {
           if(n > 5) {
     		    int j = 0;
-    		    for(int m= 4; m>=1; --m){
-              printf("%02X", data[m]);
-              printf("\n");
+    		    for(int m= 4; m>=1; --m) {
     			    size = size + (( data[m] & 0xFF ) << (8*j));
     			    ++j;
     		    }		
     	    }
     	    byte_to_read = 1 + 4 + size;
-          printf("%d\n", byte_to_read);
         }
         else {
           if(n > 3) {
     		    int j = 0;
-    		    for(int m = 2; m>=1; --m){
-              printf("%02X", data[m]);
+    		    for(int m = 2; m>=1; --m) {
     			    size = size + (( data[m] & 0xFF ) << (8*j));
     			    ++j;
     		    }		
     	    }
     	    byte_to_read = 1 + 2 + size;
-          printf("%d\n", byte_to_read);
         }
         //=----------------------------------------------------------------
-      }
+      } // ret > 0
     }// while loop
     
     payload = malloc(size);
@@ -111,7 +104,6 @@ int event_manager_run(int sd, struct sockaddr_in address, int addrlen, int *clie
     else {
       memcpy(payload, data+3, size);
     }
-    printf(" before calling the process message %d\n", size);
     Message msg = create_message(size, payload);
     CommandMessage m = create_command_message(code, msg);
     ResultMessage res = process_message(m);
@@ -122,12 +114,8 @@ int event_manager_run(int sd, struct sockaddr_in address, int addrlen, int *clie
       Message msg = res->message;
       uint16_t response_size = msg->size;
       uint16_t htons_size = htons(response_size);
-      printf("response size: %d , %d\n", response_size, htons_size);
       memcpy(buff+1, &htons_size, 2);
-      printf("%02X %02X %02X \n ", buff[0], buff[1], buff[2]);
-      printf("%02X %02X %02X \n ", buff[3], buff[4], buff[5]);
       memcpy(buff+3, msg->payload, msg->size);
-      printf("%02X %02X %02X \n ", buff[3], buff[4], buff[5]);
       // and send that buffer to client 
       write(sd, buff, sizeof(buff));
       destroy_result_message(res);

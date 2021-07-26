@@ -75,14 +75,9 @@ TA_CTX* ta_ctx_get(TEEC_UUID uuid)
 }
 //---------------------------------------------------------------------------------------
 void check_rc (TEEC_Result rc, const char *errmsg, uint32_t *orig) {
-
-   printf("rc numebr %x\n", rc);
    if (rc != TEEC_SUCCESS) {
-      fprintf(stderr, "%s: 0x%08x", errmsg, rc);
       if (orig)
       fprintf(stderr, " (orig=%d)", (int)*orig);
-      fprintf(stderr, "\n");
-
       exit(1);
    }
 }
@@ -99,8 +94,6 @@ TEEC_UUID calculate_uuid (unsigned char* buf){
     ++j;
   }
   uuid_struct.module_id = id;
-  printf("uuid_struct module id: %d\n", uuid_struct.module_id);
-
 
   j = 0;
   int timelow = 0;
@@ -109,8 +102,6 @@ TEEC_UUID calculate_uuid (unsigned char* buf){
     ++j;
   }	
   uuid.timeLow = timelow;
-
-  printf("%d\n", uuid.timeLow);
 
 //-----------------------------------------------
 
@@ -121,8 +112,6 @@ TEEC_UUID calculate_uuid (unsigned char* buf){
     ++j;
   }	
   uuid.timeMid = mid;
-  
-  printf("%d\n", uuid.timeMid);
 //-------------------------------------------------------------
 
   j = 0;
@@ -132,12 +121,10 @@ TEEC_UUID calculate_uuid (unsigned char* buf){
     ++j;
   }	
   uuid.timeHiAndVersion = high;
-  printf("%d\n", uuid.timeHiAndVersion);
   ///------------------------------------------------------------------------------
 
   for(int m = 10; m < 18; m++){
     uuid.clockSeqAndNode[m-10] = buf[m];
-    printf("%x", uuid.clockSeqAndNode[m-10]);
   }
   uuid_struct.uuid =  uuid;
   uuid_add(&uuid_struct);
@@ -149,11 +136,6 @@ ResultMessage load_enclave(unsigned char* buf, uint32_t size) {
   TA_CTX ctx;
   TEEC_Result rc;
   uint32_t err_origin;
-
-  printf("^^^^^^^^^^^ size of TA:  %d \n", size);
-  for(int i=0; i<100; i++){
-    printf("%02X", buf[i]);
-  }
 
   ctx.uuid = calculate_uuid(buf);
 
@@ -176,8 +158,6 @@ ResultMessage load_enclave(unsigned char* buf, uint32_t size) {
 		     ctx.uuid.clockSeqAndNode[5],
 		     ctx.uuid.clockSeqAndNode[6],
 		     ctx.uuid.clockSeqAndNode[7]);
-  
-  //printf("%s", fname);
   
   file = fopen(fname, "w"); 
   
@@ -208,8 +188,6 @@ ResultMessage handle_set_key(unsigned char* buf, uint16_t module_id) {
   unsigned char* ad;
   unsigned char* cipher;
   unsigned char* tag;
-
-  printf("****************handle set key**********************\n");
 //----------------------------------------------------------------------------------
   
   ad = malloc(7);
@@ -242,17 +220,11 @@ ResultMessage handle_set_key(unsigned char* buf, uint16_t module_id) {
   temp_sess.session_id = ta_ctx->sess.session_id;
   temp_sess.ctx = &temp_ctx;
 
- 
-  printf("context in sesssion %p\n", ta_ctx->sess.ctx);
   rc = TEEC_InvokeCommand(&temp_sess, 0, &ta_ctx->op, &err_origin);
   check_rc(rc, "TEEC_InvokeCommand", &err_origin);
-  if (rc == TEEC_SUCCESS){
-    printf("TEEC_SUCCESS\n");
-  }
-  
+
 // everything went good
   ResultMessage res = RESULT(ResultCode_Ok);
-  printf("to ro khoda  set key\n");
   free(ad);
   free(cipher);
   free(tag);
@@ -266,8 +238,6 @@ ResultMessage handle_attest(unsigned char* buf, uint16_t module_id) {
   uint32_t err_origin;
   unsigned char* challenge;
   unsigned char* challenge_mac;
-
-  printf("**************** handle attest **********************\n");
 //----------------------------------------------------------------------------------
   
   challenge = malloc(16);
@@ -297,19 +267,10 @@ ResultMessage handle_attest(unsigned char* buf, uint16_t module_id) {
 
   rc = TEEC_InvokeCommand(&temp_sess, 1, &ta_ctx->op, &err_origin);
   check_rc(rc, "TEEC_InvokeCommand", &err_origin);
-  if (rc == TEEC_SUCCESS){
-    printf("TEEC_SUCCESS\n");
-  }
-  for(int i=0; i<16; i++){
-		printf("%02X", challenge_mac[i]);
-	}
  
 // everything went good
   uint32_t size =  16;
   ResultMessage res = RESULT_DATA(ResultCode_Ok, size, challenge_mac);
-  printf("to ro khoda  atessttttt\n");
-  //free(challenge);
-  //free(challenge_mac);
   return res;
 }
 
@@ -318,7 +279,7 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
   UUID* uuid_struct = uuid_get(module_id);
   TEEC_Result rc;
   uint32_t err_origin;
-  printf("****************handle user entrypoint **********************\n");
+
   //----------------------------------------------------------------------------------
   int j = 0;
   uint32_t index = 0;
@@ -363,12 +324,6 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
 
   if (rc == TEEC_SUCCESS){
 
-    printf("TEEC_SUCCESS\n");
-    //printf("%d\n", ctx1->op.params[0].value.a);
-    //for (int n = 0; n < ctx1->op.params[2].tmpref.size; n++)
-		  //printf("%02x ", ((uint8_t *)ctx1->op.params[2].tmpref.buffer)[n]);
-	  //printf("\n");
-
     for(int i = 0; i < ctx1->op.params[0].value.a; i++){
       uint16_t conn_id = 0;
       unsigned char *handle_encrypt;
@@ -389,7 +344,6 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
   } 
   // everything went good
   ResultMessage res = RESULT(ResultCode_Ok);
-  printf("to ro khoda  call\n");
   free(conn_id_buf);
   free(encrypt_buf);
   free(tag_buf);
@@ -397,17 +351,7 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
 }
 
 static int is_local_connection(Connection* connection) {
-
-  if(connection->to_port != PORT){
-    printf("port is not equal!!!\n");
-    return false;
-  }
-  else{
-    printf("port is same but ip should be checked!!\n");
-    return (connection->to_address.u32.u32 == 0) || 
-            ((connection->to_address.u8[3]==1)&&(connection->to_address.u8[2]==0) &&
-             (connection->to_address.u8[1]==0)&&(connection->to_address.u8[0]==127));
-  }
+  return connection->local;
   
 }
 
@@ -429,13 +373,10 @@ static void handle_remote_connection(Connection* connection,
 
     sprintf(ip, "%d.%d.%d.%d", connection->to_address.u8[0], connection->to_address.u8[1], 
                 connection->to_address.u8[2],connection->to_address.u8[3]);
-    printf("IP address is: %s\n", ip);
 
     if(strcmp(ip, loopback) == 0){
-        printf("equal");
         sprintf(ip, "%d.%d.%d.%d", 10, 0, 2, 2); //10.0.2.2 --> QEMU gateway IP address
     }
-    printf("Aferrr IP address is: %s\n", ip);
 	// socket create and varification 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
@@ -472,20 +413,11 @@ static void handle_remote_connection(Connection* connection,
     memcpy(payload + 7, encrypt, size);
     memcpy(payload + 7 + size, tag, 16);
    
-    for(int i = 0; i<23+size; i++){
-        printf("%02X",payload[i]);
-    }
     // and send that buffer to client 
     write(sockfd, payload, sizeof(payload));
-    printf("Hello message sent\n");
     bzero(payload, sizeof(payload)); 
     int ret = read(sockfd, payload, sizeof(payload));
-    printf("inside of while ret: %d\n", ret);
-    for(int i = 0; i<23+size; i++){
-        printf("%02X",payload[i]);
-    }
     ResultCode code = u8_to_result_code(payload[0]);
-    printf("%02X", payload[0]);
     if(code == ResultCode_Ok){
       close(sockfd);
     }
@@ -494,11 +426,6 @@ static void handle_remote_connection(Connection* connection,
 void reactive_handle_output(uint16_t conn_id, unsigned char* encrypt, uint32_t size, unsigned char *tag)
 {
   Connection* connection = connections_get(conn_id);
-
-  printf("conn_id = %d port = %d address = %x %x %x %x\n",
-              connection->conn_id, connection->to_port,
-              connection->to_address.u8[0], connection->to_address.u8[1],
-              connection->to_address.u8[2], connection->to_address.u8[3]);
 
   if (is_local_connection(connection))
       handle_local_connection(connection, encrypt, size, tag);
@@ -512,7 +439,6 @@ void reactive_handle_input(uint16_t sm, conn_index conn_id,
   TEEC_Result rc;
   uint32_t err_origin;
   UUID* uuid_struct = uuid_get(sm);
-  printf("****************Reactive Handle Input**********************\n");
 //----------------------------------------------------------------------------------
   TA_CTX* ta_ctx = ta_ctx_get(uuid_struct->uuid);
 //-----------------------------------------------------------------
@@ -537,7 +463,4 @@ void reactive_handle_input(uint16_t sm, conn_index conn_id,
 
   rc = TEEC_InvokeCommand(&temp_sess, 2, &ta_ctx->op, &err_origin);
   check_rc(rc, "TEEC_InvokeCommand", &err_origin);
-  if (rc == TEEC_SUCCESS){
-    printf("Handle Input TEEC_SUCCESS\n");
-  }
 }
