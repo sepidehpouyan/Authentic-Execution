@@ -368,8 +368,8 @@ static void handle_remote_connection(Connection* connection,
     int sockfd; 
     struct sockaddr_in servaddr; 
 
-    char loopback[10] = "127.0.0.1";
-    char ip[10];
+    char loopback[16] = "127.0.0.1";
+    char ip[16] = {0};
 
     sprintf(ip, "%d.%d.%d.%d", connection->to_address.u8[0], connection->to_address.u8[1], 
                 connection->to_address.u8[2],connection->to_address.u8[3]);
