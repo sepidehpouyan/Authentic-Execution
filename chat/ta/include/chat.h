@@ -1,0 +1,12 @@
+
+#ifndef TA_CHAT_H
+#define TA_CHAT_H
+
+
+#define TA_CHAT_UUID \
+	{ 0xe317e0f3, 0x6443, 0x4140, { 0xaa, 0xdf, 0xdf, 0x54, 0xfa, 0x13, 0x12, 0x17} }
+		
+
+#define TA_SOCKET_CMD_TCP_OPEN		0
+
+#endif
