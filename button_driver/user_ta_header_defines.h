@@ -2,9 +2,9 @@
 #define USER_TA_HEADER_DEFINES_H
 
 /* To get the TA UUID definition */
-#include <ta1.h>
+#include <button_driver.h>
 
-#define TA_UUID			TA_ONE_UUID
+#define TA_UUID			BUTTON_DRIVER_UUID
 
 /*
  * TA properties: multi-instance TA, no specific attribute

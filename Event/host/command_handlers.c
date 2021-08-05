@@ -131,6 +131,35 @@ ResultMessage handler_remote_output(CommandMessage m) {
   return RESULT(ResultCode_Ok);
 }
 
+ResultMessage handler_module_output(CommandMessage m) {
+
+  uint32_t size = m->message->size - (2 + 16); // conn id + tag
+  conn_index conn_id;
+  unsigned char *encrypt;
+  encrypt = malloc(size);
+  unsigned char *tag;
+  tag = malloc(16);
+  
+  //--------------------------------------------------------------------
+
+  int j = 0;
+  conn_id = 0;
+  for(int n = 1; n >= 0; --n){
+    conn_id = conn_id + (( m->message->payload[n] & 0xFF ) << (8*j));
+    ++j;
+  }	
+
+  memcpy(encrypt, m->message->payload + 2, size);
+  memcpy(tag, m->message->payload + 2 + size, 16);
+
+  reactive_handle_output(conn_id, encrypt, size, tag);
+
+  free(encrypt);
+  free(tag);
+  destroy_command_message(m);
+
+  return RESULT(ResultCode_Ok);
+}
 
 
 ResultMessage handler_ping(CommandMessage m) {

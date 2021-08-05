@@ -322,7 +322,7 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
   rc = TEEC_InvokeCommand(&temp_sess1, index, &ctx1->op, &err_origin);
   check_rc(rc, "TEEC_InvokeCommand", &err_origin);
 
-  if (rc == TEEC_SUCCESS){
+  /*if (rc == TEEC_SUCCESS){
 
     for(int i = 0; i < ctx1->op.params[0].value.a; i++){
       uint16_t conn_id = 0;
@@ -341,7 +341,7 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
       free(handle_encrypt);
       free(handle_tag);
     }
-  } 
+  }*/
   // everything went good
   ResultMessage res = RESULT(ResultCode_Ok);
   free(conn_id_buf);
@@ -357,6 +357,7 @@ static int is_local_connection(Connection* connection) {
 
 static void handle_local_connection(Connection* connection,
                           unsigned char *encrypt, uint32_t size, unsigned char *tag) {
+    printf("handle local connnection\n");
     reactive_handle_input(connection->to_sm, connection->conn_id, encrypt, size, tag);
 }
 

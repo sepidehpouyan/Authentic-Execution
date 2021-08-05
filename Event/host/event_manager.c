@@ -24,7 +24,12 @@ ResultMessage process_message(CommandMessage m) {
       return handler_remote_output(m); // 
 
     case CommandCode_LoadSM:
+      printf("firstttttt\n");
       return handler_load_sm(m); // firsttttt
+
+    case CommandCode_ModuleOutput:
+      printf("yohoooooooo\n");
+      return handler_module_output(m);
 
     case CommandCode_Ping:
       return handler_ping(m);

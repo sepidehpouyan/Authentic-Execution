@@ -63,8 +63,8 @@ int main()
     address.sin_addr.s_addr = INADDR_ANY;   
     address.sin_port = htons(PORT);  
 
-    printf(" ip is : %s , port : %d\n",
-                     inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
+    //printf(" ip is : %s , port : %d\n",
+                     //inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
          
     //bind the socket to localhost port 1236  
     if (bind(master_socket, (struct sockaddr *)&address, sizeof(address))<0)   
@@ -72,7 +72,7 @@ int main()
         perror("bind failed");   
         exit(EXIT_FAILURE);   
     }   
-    printf("Listener on port %d \n", PORT);   
+    //printf("Listener on port %d \n", PORT);   
          
     //try to specify maximum of 3 pending connections for the master socket  
     if (listen(master_socket, 3) < 0)   
@@ -120,8 +120,7 @@ int main()
              
         //If something happened on the master socket ,  
         //then its an incoming connection  
-        if (FD_ISSET(master_socket, &readfds))   
-        {  
+        if (FD_ISSET(master_socket, &readfds)) {  
              
             if ((new_socket = accept(master_socket,  
                     (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)   
@@ -155,6 +154,7 @@ int main()
                  
             if (FD_ISSET(sd , &readfds))   
             {
+                printf("inside if in for\n");
                 int res = event_manager_run(sd, address, addrlen, client_socket, i);
                 
             }
