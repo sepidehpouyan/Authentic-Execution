@@ -154,7 +154,6 @@ int main()
                  
             if (FD_ISSET(sd , &readfds))   
             {
-                printf("inside if in for\n");
                 int res = event_manager_run(sd, address, addrlen, client_socket, i);
                 
             }

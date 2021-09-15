@@ -24,12 +24,7 @@ ResultMessage process_message(CommandMessage m) {
       return handler_remote_output(m); // 
 
     case CommandCode_LoadSM:
-      printf("firstttttt\n");
       return handler_load_sm(m); // firsttttt
-
-    case CommandCode_ModuleOutput:
-      printf("yohoooooooo\n");
-      return handler_module_output(m);
 
     case CommandCode_Ping:
       return handler_ping(m);
@@ -43,8 +38,9 @@ ResultMessage process_message(CommandMessage m) {
 }
 
 // Function designed for reading data on the socket 
-int event_manager_run(int sd, struct sockaddr_in address, int addrlen, int *client_socket, int index) 
-{
+int event_manager_run(int sd, struct sockaddr_in address, int addrlen,
+           int *client_socket, int index) {
+
     unsigned char buff[MAX]; 
     unsigned char data[MAX];
     unsigned char *payload;
@@ -60,13 +56,14 @@ int event_manager_run(int sd, struct sockaddr_in address, int addrlen, int *clie
     while((n < byte_to_read)){
       
       ret = read(sd, buff, sizeof(buff));
-    	if(ret == 0){
+      printf("sd = %d : ret = %d\n", sd, ret);
+    	if(ret == 0) {
         //Somebody disconnected , get his details and print  
-        getpeername(sd , (struct sockaddr*)&address ,(socklen_t*)&addrlen);   
-        printf("Host disconnected , ip %s , port %d \n", 
-                  inet_ntoa(address.sin_addr) , ntohs(address.sin_port));   
+        //getpeername(sd , (struct sockaddr*)&address ,(socklen_t*)&addrlen);   
+        //printf("Host disconnected , ip %s , port %d \n", 
+                  //inet_ntoa(address.sin_addr) , ntohs(address.sin_port));   
                          
-        //Close the socket and mark as 0 in list for reuse  
+        //Close the socket and mark as 0 in list for reuse 
         close(sd);  
         client_socket[index] = 0;
         return 0;

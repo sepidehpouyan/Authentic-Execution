@@ -293,17 +293,18 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
   unsigned char *conn_id_buf;
   conn_id_buf = malloc(32);
   unsigned char *encrypt_buf;
-  encrypt_buf = malloc(16 * size);
-  memcpy(encrypt_buf, buf+4, size);
+  encrypt_buf = malloc(16 * 16);
+  memcpy(encrypt_buf, buf + 4, size);
   unsigned char *tag_buf;
   tag_buf = malloc(256);
 
   memset(&ctx1->op, 0, sizeof(ctx1->op));
-  ctx1->op.params[0].value.a = size;
+  ctx1->op.params[0].value.b = 0; // the number of output
+  ctx1->op.params[0].value.a = size; // size of data
   ctx1->op.params[1].tmpref.buffer = (void *) conn_id_buf;
   ctx1->op.params[1].tmpref.size = 32; // 16 * 2
   ctx1->op.params[2].tmpref.buffer = (void *) encrypt_buf;
-  ctx1->op.params[2].tmpref.size = 16 * size; // 16 * size
+  ctx1->op.params[2].tmpref.size = 16 * 16; // 16 * 16
   ctx1->op.params[3].tmpref.buffer = (void *) tag_buf;
   ctx1->op.params[3].tmpref.size = 256; // 16 * 16
   ctx1->op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_MEMREF_TEMP_OUTPUT,
@@ -322,27 +323,34 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
   rc = TEEC_InvokeCommand(&temp_sess1, index, &ctx1->op, &err_origin);
   check_rc(rc, "TEEC_InvokeCommand", &err_origin);
 
-  /*if (rc == TEEC_SUCCESS){
+  if (rc == TEEC_SUCCESS) {
+    int index = 0;
+    for(int i = 0; i < ctx1->op.params[0].value.b; i++) {
 
-    for(int i = 0; i < ctx1->op.params[0].value.a; i++){
       uint16_t conn_id = 0;
       unsigned char *handle_encrypt;
       unsigned char *handle_tag;
-      handle_encrypt = malloc(size);
+      int data_len = 0;
+      data_len = encrypt_buf[index] & 0xFF;
+      
+      handle_encrypt = malloc(data_len);
       handle_tag = malloc(16);
       int j = 0;
-      for(int m = (2*i)+1; m >= (2*i); --m){
+      for(int m = (2 * i) + 1; m >= (2*i); --m){
         conn_id = conn_id + (( conn_id_buf[m] & 0xFF ) << (8*j));
         ++j;
       }
-      memcpy(handle_encrypt, encrypt_buf+(size * i), size);
-      memcpy(handle_tag, tag_buf+(16*i), 16);
-      reactive_handle_output(conn_id, handle_encrypt, size, handle_tag);
+      memcpy(handle_encrypt, encrypt_buf + index + 1, data_len);
+      memcpy(handle_tag, tag_buf + (16 * i), 16);
+
+      reactive_handle_output(conn_id, handle_encrypt, data_len, handle_tag);
+
+      index =  index + data_len + 1;
       free(handle_encrypt);
       free(handle_tag);
     }
-  }*/
-  // everything went good
+  }
+  // *************************************************
   ResultMessage res = RESULT(ResultCode_Ok);
   free(conn_id_buf);
   free(encrypt_buf);
@@ -435,23 +443,34 @@ void reactive_handle_output(uint16_t conn_id, unsigned char* encrypt, uint32_t s
 }
 
 void reactive_handle_input(uint16_t sm, conn_index conn_id, 
-                              unsigned char *encrypt, uint32_t size, unsigned char *tag)
-{
+                          unsigned char *encrypt, uint32_t size, unsigned char *tag) {
+
   TEEC_Result rc;
   uint32_t err_origin;
   UUID* uuid_struct = uuid_get(sm);
-//----------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------
   TA_CTX* ta_ctx = ta_ctx_get(uuid_struct->uuid);
-//-----------------------------------------------------------------
+  //-----------------------------------------------------------------
+  unsigned char *conn_id_buf;
+  conn_id_buf = malloc(32);
+  unsigned char *encrypt_buf;
+  encrypt_buf = malloc(16 * 16);
+  memcpy(encrypt_buf, encrypt, size);
+  unsigned char *tag_buf;
+  tag_buf = malloc(256);
+  memcpy(tag_buf, tag, 16);
+
   memset(&ta_ctx->op, 0, sizeof(ta_ctx->op));
-	ta_ctx->op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT,
-					 TEEC_MEMREF_TEMP_INPUT,
-					 TEEC_MEMREF_TEMP_INPUT, TEEC_NONE);
-	ta_ctx->op.params[0].value.a = conn_id;
-	ta_ctx->op.params[1].tmpref.buffer = encrypt;
-	ta_ctx->op.params[1].tmpref.size = size;
-	ta_ctx->op.params[2].tmpref.buffer = tag;
-	ta_ctx->op.params[2].tmpref.size = 16;
+	ta_ctx->op.params[0].value.a = size;
+  ta_ctx->op.params[0].value.b = conn_id;
+	ta_ctx->op.params[1].tmpref.buffer = (void *) conn_id_buf;
+	ta_ctx->op.params[1].tmpref.size = 32;
+	ta_ctx->op.params[2].tmpref.buffer = (void *) encrypt_buf;
+	ta_ctx->op.params[2].tmpref.size = 16 * 16;
+  ta_ctx->op.params[3].tmpref.buffer = (void *) tag_buf;
+	ta_ctx->op.params[3].tmpref.size = 16 * 16;
+  ta_ctx->op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_MEMREF_TEMP_OUTPUT,
+					        TEEC_MEMREF_TEMP_INOUT, TEEC_MEMREF_TEMP_INOUT);
 
   TEEC_Session temp_sess;
   TEEC_Context temp_ctx;
@@ -464,4 +483,37 @@ void reactive_handle_input(uint16_t sm, conn_index conn_id,
 
   rc = TEEC_InvokeCommand(&temp_sess, 2, &ta_ctx->op, &err_origin);
   check_rc(rc, "TEEC_InvokeCommand", &err_origin);
+
+  if (rc == TEEC_SUCCESS) {
+    int index = 0;
+    for(int i = 0; i < ta_ctx->op.params[0].value.b; i++) {
+      uint16_t conn_id = 0;
+      unsigned char *handle_encrypt;
+      unsigned char *handle_tag;
+      int data_len = 0;
+      data_len = encrypt_buf[index] & 0xFF;
+      
+      handle_encrypt = malloc(data_len);
+      handle_tag = malloc(16);
+      int j = 0;
+      for(int m = (2 * i) + 1; m >= (2*i); --m){
+        conn_id = conn_id + (( conn_id_buf[m] & 0xFF ) << (8*j));
+        ++j;
+      }
+      memcpy(handle_encrypt, encrypt_buf + index + 1, data_len);
+      memcpy(handle_tag, tag_buf + (16 * i), 16);
+
+      reactive_handle_output(conn_id, handle_encrypt, data_len, handle_tag);
+
+      index =  index + data_len + 1;
+      free(handle_encrypt);
+      free(handle_tag);
+    } // for
+  } // if success
+  // *************************************************
+ 
+  free(conn_id_buf);
+  free(encrypt_buf);
+  free(tag_buf);
+
 }
