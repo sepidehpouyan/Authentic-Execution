@@ -56,7 +56,6 @@ int event_manager_run(int sd, struct sockaddr_in address, int addrlen,
     while((n < byte_to_read)){
       
       ret = read(sd, buff, sizeof(buff));
-      printf("sd = %d : ret = %d\n", sd, ret);
     	if(ret == 0) {
         //Somebody disconnected , get his details and print  
         //getpeername(sd , (struct sockaddr*)&address ,(socklen_t*)&addrlen);   

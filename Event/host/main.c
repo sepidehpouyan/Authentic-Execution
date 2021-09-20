@@ -128,11 +128,11 @@ int main()
                 perror("accept");   
                 exit(EXIT_FAILURE);   
             } 
-            printf("accept new socket:%d\n", new_socket);  
+            //printf("accept new socket:%d\n", new_socket);  
              
             //inform user of socket number - used in send and receive commands  
-            printf("New connection , socket fd is %d , ip is : %s , port : %d\n",
-                    new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port)); 
+            //printf("New connection , socket fd is %d , ip is : %s , port : %d\n",
+                    //new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port)); 
                
             //add new socket to array of sockets  
             for (i = 0; i < max_clients; i++)   
@@ -141,7 +141,7 @@ int main()
                 if( client_socket[i] == 0 )   
                 {   
                     client_socket[i] = new_socket;   
-                    printf("Adding new socket %d to list of sockets as %d\n" , new_socket , i);    
+                    //printf("Adding new socket %d to list of sockets as %d\n" , new_socket , i);    
                     break;   
                 }   
             }   

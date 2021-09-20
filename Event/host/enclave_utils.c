@@ -365,7 +365,6 @@ static int is_local_connection(Connection* connection) {
 
 static void handle_local_connection(Connection* connection,
                           unsigned char *encrypt, uint32_t size, unsigned char *tag) {
-    printf("handle local connnection\n");
     reactive_handle_input(connection->to_sm, connection->conn_id, encrypt, size, tag);
 }
 
