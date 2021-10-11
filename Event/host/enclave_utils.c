@@ -444,10 +444,16 @@ void reactive_handle_output(uint16_t conn_id, unsigned char* encrypt, uint32_t s
 void reactive_handle_input(uint16_t sm, conn_index conn_id, 
                           unsigned char *encrypt, uint32_t size, unsigned char *tag) {
 
+  struct timeval start, stop, tval_result;
+
+	gettimeofday(&start, NULL);
+	printf("Time elapsed in EM: %ld.%06ld\n", (long int)start.tv_sec, 
+							(long int)start.tv_usec);
+  
   TEEC_Result rc;
   uint32_t err_origin;
   UUID* uuid_struct = uuid_get(sm);
-  //----------------------------------------------------------------------------------
+  //-----------------------------------------------------------------
   TA_CTX* ta_ctx = ta_ctx_get(uuid_struct->uuid);
   //-----------------------------------------------------------------
   unsigned char *conn_id_buf;
