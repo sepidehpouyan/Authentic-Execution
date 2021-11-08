@@ -1,0 +1,26 @@
+name: Docker
+on:
+  push:
+    branches:
+      - main
+      - master
+  schedule:
+    - cron: '0 0 1 */1 *' # Every month
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    -
+      uses: actions/checkout@master
+    -
+      name: Build
+      id: build
+      uses: gianlu33/Publish-Docker-Github-Action@main
+      with:
+        name: authexec/event-manager-trustzone
+        username: authexec
+        password: ${{ secrets.DOCKER_TOKEN }}
+        cache: ${{ github.event_name == 'push' }}
+        tag_names: true
