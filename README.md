@@ -29,7 +29,7 @@ make -j `nproc`
 
 ```bash
 ### <volume>: absolute path of the root folder created in the previous phase (default: /opt/optee)
-make event_manager_trustzone PORT=<port> TZ_VOLUME=<volume>
+make run PORT=<port> OPTEE_DIR=<volume>
 ```
 
 The container automatically runs the Event Manager at startup.
