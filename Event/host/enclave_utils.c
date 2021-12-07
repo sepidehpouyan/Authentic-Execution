@@ -287,7 +287,7 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
     index = index + (( buf[m] & 0xFF ) << (8*j));
     ++j;
   }
-  //-----------------^^^^^^^^^&&&&&&&&^^^^^^^^^^----------
+  //-----------------^^^^^^^^^&&&&&&&&^^^^^^^^^^---------------------
   TA_CTX* ctx1 = ta_ctx_get(uuid_struct->uuid);
   //-----------------------------------------------------------------
   unsigned char *conn_id_buf;
@@ -299,7 +299,7 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
   tag_buf = malloc(256);
 
   memset(&ctx1->op, 0, sizeof(ctx1->op));
-  ctx1->op.params[0].value.b = 0; // the number of output
+  ctx1->op.params[0].value.b = index; // the number of output
   ctx1->op.params[0].value.a = size; // size of data
   ctx1->op.params[1].tmpref.buffer = (void *) conn_id_buf;
   ctx1->op.params[1].tmpref.size = 32; // 16 * 2
@@ -320,7 +320,7 @@ ResultMessage handle_user_entrypoint(unsigned char* buf, uint32_t size, uint16_t
   temp_sess1.session_id = ctx1->sess.session_id;
   temp_sess1.ctx = &temp_ctx1;
 
-  rc = TEEC_InvokeCommand(&temp_sess1, index, &ctx1->op, &err_origin);
+  rc = TEEC_InvokeCommand(&temp_sess1, 3, &ctx1->op, &err_origin);
   check_rc(rc, "TEEC_InvokeCommand", &err_origin);
 
   if (rc == TEEC_SUCCESS) {
